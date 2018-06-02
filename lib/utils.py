@@ -28,6 +28,17 @@ def string_to_name(s):
     name |= char_to_symbol(s[12]) & 0x0F;
   return name;
 
+def name_to_string(n):
+  charmap = ".12345abcdefghijklmnopqrstuvwxyz"
+  s = bytearray(13*'.')
+  tmp = n;
+  for i in xrange(13):
+    c = charmap[tmp & (0x0f if i == 0 else 0x1f)]
+    s[12-i] = c
+    tmp >>= (4 if i == 0 else 5)
+  return str(s).strip('.')
+
+
 class DictDiffer(object):
   """
     Calculate the difference between two dictionaries as:
@@ -53,8 +64,12 @@ class DictDiffer(object):
   def unchanged(self):
     return set(o for o in self.intersect if self.past_dict[o] == self.current_dict[o])
 
-# def int2name(n):
-  
+def symbol2int(symbol):
+  i = 0
+  for s in reversed(symbol):
+    i <<= 8
+    i |= ord(s)
+  return i
 
 def asset2int(amountstr):
   try:

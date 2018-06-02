@@ -1,6 +1,11 @@
+import os
+import sys
 import argparse
 import traceback
 import importlib
+
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+sys.path[0:0] = [ DIR_PATH + '/../lib' ]
 
 from utils import fail
 

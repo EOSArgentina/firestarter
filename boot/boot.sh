@@ -34,6 +34,16 @@ runcmd() {
   echo
 }
 
+echo "How many accounts you want to inject from ERC20 snapshot?"
+select yn in "1000" "5000" "30000" "All"; do
+    case $yn in
+        "1000" ) ACCOUNTS_TO_INJECT=1000; break;;
+        "5000" ) ACCOUNTS_TO_INJECT=5000; break;;
+        "3000" ) ACCOUNTS_TO_INJECT=30000; break;;
+        "All" ) ACCOUNTS_TO_INJECT=0; break;;
+    esac
+done      
+
 #We clear everything
 ./shutdown.sh
 ./clear.sh
@@ -113,8 +123,9 @@ echo '["eosio.msig", 1]'> $tmp
 runcmd cleos push action eosio setpriv $tmp -p eosio@active
 
 # Inject ERC20 snapshot into the running nodeos
+clear
 cd $ME/../inject
-python injector.py --csv-balance ./files/snapshot.csv --accounts-per-tx $ACCOUNTS_PER_TX --core-symbol $CORE_SYMBOL
+python injector.py --csv-balance ./files/snapshot.csv --accounts-per-tx $ACCOUNTS_PER_TX --core-symbol $CORE_SYMBOL --accounts-to-inject $ACCOUNTS_TO_INJECT
 cd -
 
 #RESIGN ACCOUNTS
@@ -125,9 +136,9 @@ runcmd cleos push action eosio updateauth $tmp -p eosio@owner
 
 for account in  $SYSTEM_ACCOUNTS;do
   echo  '{"account": "'$account'", "permission": "active", "parent": "owner", "auth":{"threshold": 1, "keys": [], "waits": [], "accounts": [{"weight": 1, "permission": {"actor": "eosio", "permission": active}}]}}' > $tmp 
-  runcmd cleos push action eosio updateauth $tmp -p eosio@active
+  runcmd cleos push action eosio updateauth $tmp -p $account@active
   echo '{"account": "'$account'", "permission": "owner", "parent": "", "auth":{"threshold": 1, "keys": [], "waits": [], "accounts": [{"weight": 1, "permission": {"actor": "eosio", "permission": active}}]}}' > $tmp
-  runcmd cleos push action eosio updateauth $tmp -p eosio@owner
+  runcmd cleos push action eosio updateauth $tmp -p $account@owner
 done
 
 ./watch.sh

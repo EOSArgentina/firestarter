@@ -15,6 +15,7 @@ EOS_ISSUE="2000000000.0000 "$CORE_SYMBOL
 MEMO="hola mundo :)"
 
 ACCOUNTS_PER_TX=1500
+ACCOUNTS_TO_INJECT=0
 
 ###################################################
 #      KEYS

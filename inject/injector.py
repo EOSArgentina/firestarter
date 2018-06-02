@@ -43,12 +43,18 @@ if __name__ == "__main__":
   parser.add_argument('--accounts-per-tx', metavar='apt', help="Number of account creation per tx", default=200)
   parser.add_argument('--cleos', metavar='cleos', help="Path to cleos", default="cleos")
   parser.add_argument('--priv-key', metavar='priv', help="eosio private key", default="5KZgrDCQqxU5t9vuxeTveMDPWU7xwyqTxt6y61Dy1KQhWWHMBYo")
+  parser.add_argument('--accounts-to-inject', metavar='row', help="Number of accounts to inject from CSV", default="0")
 
   args = parser.parse_args()
 
   try:
     erc20_snapshot = load_erc20_snapshot(args)
     if not erc20_snapshot: sys.exit(1)
+
+    if int(args.accounts_to_inject) == 0:
+      args.accounts_to_inject = len(erc20_snapshot)
+    else:
+      args.accounts_to_inject = int(args.accounts_to_inject)
 
     tmp_file = tempfile.mkstemp()[1]
 
@@ -58,8 +64,12 @@ if __name__ == "__main__":
       retry([args.cleos,"--url=%s" % args.nodeos_url, "get","table","eosio","eosio","global"])
     )['rows'][0]
 
+    max_block_cpu_usage  = bparams['max_block_cpu_usage']
+    max_transaction_cpu_usage = bparams['max_transaction_cpu_usage']
+
     bparams['max_block_cpu_usage'] = 100000000
     bparams['max_transaction_cpu_usage'] = 99999899
+
     with open(tmp_file,'w') as tmp:
       tmp.write(json.dumps({'params':bparams}))
 
@@ -74,6 +84,7 @@ if __name__ == "__main__":
     info['chain_id'] = r.get('%s/v1/chain/get_info' % args.nodeos_url).json()['chain_id']
     success()
 
+    args.accounts_per_tx = min(int(args.accounts_to_inject), int(args.accounts_per_tx))
     # Set limit
     step('Setting %d accounts/tx' % int(args.accounts_per_tx))
     limit = int(args.accounts_per_tx)
@@ -86,14 +97,27 @@ if __name__ == "__main__":
       accounts.append(erc20_snapshot[account])
       if len(accounts) == limit:
         total += len(accounts)
-        step('Creating accounts  %d/%d      (%.2f%%)' % (total, len(erc20_snapshot), (100.0*float(total)/len(erc20_snapshot)) ))
+        step('Creating accounts  %d/%d      (%.2f%%)' % (total, args.accounts_to_inject, (100.0*float(total)/float(args.accounts_to_inject)) ))
         send_tx(tmp_file, accounts, info, args)
         success()
         accounts = []
 
-    total += len(accounts)
-    step('Creating accounts  %d/%d      (%.2f%%)' % (total, len(erc20_snapshot), (100.0*float(total)/len(erc20_snapshot)) ))
-    send_tx(tmp_file, accounts, info, args)
+      if total >= args.accounts_to_inject:
+        break
+
+    if total < args.accounts_to_inject:
+      total += len(accounts)
+      step('Creating accounts  %d/%d      (%.2f%%)' % (total, len(erc20_snapshot), (100.0*float(total)/float(args.accounts_to_inject)) ))
+      send_tx(tmp_file, accounts, info, args)
+      success()
+
+    # Ramp down
+    step('Ramp down blockchain limits')
+    bparams['max_block_cpu_usage'] = max_block_cpu_usage
+    bparams['max_transaction_cpu_usage'] = max_transaction_cpu_usage
+    with open(tmp_file,'w') as tmp:
+      tmp.write(json.dumps({'params':bparams}))
+    retry([args.cleos,"--url=%s" % args.nodeos_url, "push","action","eosio","setparams",tmp_file,"-p","eosio"])
     success()
 
   except Exception as ex:
