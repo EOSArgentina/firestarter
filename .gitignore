@@ -1,0 +1,6 @@
+nodeos.pid
+eos.log
+.mark
+boot/data/blocks
+validator/data/blocks
+validator/data/state
