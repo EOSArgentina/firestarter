@@ -132,7 +132,7 @@ def validate_genesis(snapshot, genesis):
   if len(added) != 0 or len(removed) != 0 or len(changed) != 0:
     fail()
     if len(added) != 0:
-      print "> Snapshot has: '%s' and your genesis" % (','.join(added))
+      print "> Snapshot has '%s' and your genesis dont" % (','.join(added))
     if len(removed) != 0:
       print "> Your genesis has %s and snapshot dont" % (','.join(removed))
     if len(changed) != 0:
@@ -148,18 +148,26 @@ def validate_genesis(snapshot, genesis):
   success()
   return True
 
+def print_some(print_count, to_print):
+  if print_count == 0: fail()
+  if print_count <= 5:
+    print "** {0}".format(to_print)
+    print_count += 1
+  return print_count
+
 def validate_account_creation(snapshot, balances):
   found_users = {}
+  print_count = 0
   step('Verifying user account creation')
   for account in balances.keys():
     tick()
     if account not in snapshot['accounts']:
+      print_count = print_some(print_count, account)
       continue
     found_users[account] = balances[account]
   
   not_found = len(balances) - len(found_users)
   if not_found:
-    fail()
     print "> %d (out of %d) accounts were not found in the EOS snapshot" % (not_found, len(balances))
     # TODO: uncomment
     # return False
@@ -190,7 +198,7 @@ def get_account_stake(snapshot, account, symbol):
 def validate_account_stake(snapshot, balances, args):
   step('Verifying user account stake')
   invalid_stake = 0
-
+  print_count = 0
   total_accounts = len(balances)
 
   for account in balances:
@@ -199,14 +207,14 @@ def validate_account_stake(snapshot, balances, args):
 
     liquid, net, cpu = get_account_stake(snapshot, account, args.core_symbol)
 
-    # if account == 'b1': continue
-    # TODO: validate F(stake) ?
+    b1_bad_stake = account == 'b1' and (liquid != 0 or net != 0 or cpu != 0)
 
-    if total != liquid + cpu + net:
+    # TODO: validate F(stake) ?
+    if b1_bad_stake or total != liquid + cpu + net:
+      print_count = print_some(print_count, '{3} => L:[{0}] C:[{1}] N:[{2}]'.format(liquid,cpu,net,account))
       invalid_stake += 1
 
   if invalid_stake > 0:
-    fail()
     print "> %d accounts with invalid stake" % (invalid_stake)
     return False
   else:
