@@ -1,1 +1,1 @@
-tail -f --retry logs/eos.log
+tail -f logs/eos.log

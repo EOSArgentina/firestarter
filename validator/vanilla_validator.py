@@ -308,11 +308,11 @@ def validate(args):
   erc20_snapshot = load_erc20_snapshot(args)
   genesis        = load_genesis(args)
 
-  if not validate_genesis(eos_snapshot, genesis): return
+  #if not validate_genesis(eos_snapshot, genesis): return
 
-  if not validate_global_params_against_genesis(eos_snapshot, genesis): return
+  #if not validate_global_params_against_genesis(eos_snapshot, genesis): return
 
-  if not validate_system_accounts(eos_snapshot): return
+  #if not validate_system_accounts(eos_snapshot): return
 
   #if not validate_system_contracts(eos_snapshot): return
 

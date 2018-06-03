@@ -2,8 +2,13 @@
 ME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 PEERP2P=${PEERP2P:-127.0.0.1:9876}
-GENESIS=${GENESIS:~}
-ERC20SNAPSHOT=${ERC20SNAPSHOT:~}
+GENESIS=${GENESIS:-}
+ERC20SNAPSHOT=${ERC20SNAPSHOT:-}
+BLOCKID=${BLOCKID:-$1}
+
+echo "##########################"
+echo $ERC20SNAPSHOT
+echo "##########################"
 
 nodeos --help | grep snapshot > /dev/null 2>&1
 if [[ $? -ne 0 ]]; then
@@ -12,7 +17,6 @@ if [[ $? -ne 0 ]]; then
   exit
 fi
 
-BLOCKID=$1
 if [[ "$BLOCKID" == "" ]]; then
   echo "Plase specify the block id"
   exit
@@ -79,6 +83,6 @@ if [[ $VALIDSNAPSHOT -eq 0 ]]; then
 
 fi
 
-python validator.py --validator=vanilla_validator \
+echo python validator.py --validator=vanilla_validator \
    --snapshot $JSONSNAPSHOT --genesis $GENESIS \
    --csv-balance $ERC20SNAPSHOT

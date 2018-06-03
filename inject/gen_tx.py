@@ -65,6 +65,7 @@ def gen_tx(accounts, info, args):
   
   actions = []
   for acc in accounts:
+    if acc == "b1": continue
     actions.append(newaccount(acc[CSV_EOS_ACCOUNT], acc[CSV_EOS_ADDR]))
     actions.append(buyrambytes(acc[CSV_EOS_ACCOUNT],8))
 
