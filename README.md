@@ -39,6 +39,7 @@ git merge origin/snapshot-plugin
 
 ```
 cd boot
+# optionally requires => pip install requests 
 ./boot.sh
 ```
 # 2) Chain State Snapshot & Validation Tool
