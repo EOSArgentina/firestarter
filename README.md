@@ -42,6 +42,8 @@ cd boot
 ./boot.sh
 ```
 # 2) Chain State Snapshot & Validation Tool
+
+Take snapshot locally
 - pick a block (370 in our case)
 ```
 cleos get block 370
