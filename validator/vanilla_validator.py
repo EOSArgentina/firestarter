@@ -207,10 +207,11 @@ def validate_account_stake(snapshot, balances, args):
 
     liquid, net, cpu = get_account_stake(snapshot, account, args.core_symbol)
 
-    b1_bad_stake = account == 'b1' and (liquid != 0 or net != 0 or cpu != 0)
+    if account == "b1":
+      liquid -= 10 * 10000
 
     # TODO: validate F(stake) ?
-    if b1_bad_stake or total != liquid + cpu + net:
+    if total != liquid + cpu + net:
       print_count = print_some(print_count, '{3} => L:[{0}] C:[{1}] N:[{2}]'.format(liquid,cpu,net,account))
       invalid_stake += 1
 
