@@ -1,6 +1,9 @@
 nodeos.pid
 eos.log
 .mark
-boot/data/blocks
-validator/data/blocks
-validator/data/state
+boot/data
+validator/data
+validator/data
+data
+files
+*.pyc

@@ -125,7 +125,9 @@ runcmd cleos push action eosio setpriv $tmp -p eosio@active
 # Inject ERC20 snapshot into the running nodeos
 clear
 cd $ME/../inject
-python injector.py --csv-balance ./files/snapshot.csv --accounts-per-tx $ACCOUNTS_PER_TX --core-symbol $CORE_SYMBOL --accounts-to-inject $ACCOUNTS_TO_INJECT
+python injector.py --csv-balance $ME/../validator/this/snapshot.csv \
+   --accounts-per-tx $ACCOUNTS_PER_TX --core-symbol $CORE_SYMBOL \
+   --accounts-to-inject $ACCOUNTS_TO_INJECT
 if [[ $? -ne 0 ]]; then
   echo "There were errors ^^^^"
   exit
