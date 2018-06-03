@@ -1,5 +1,3 @@
-
-This tool contains 
 # Introduction
 
 This repo contains a set of tools that allows to boot and validate an EOSIO chain.
@@ -44,24 +42,29 @@ cd boot
 ```
 # 2) Chain State Snapshot & Validation Tool
 
-Take snapshot locally
-- pick a block (370 in our case)
+A) Take snapshot locally
+1) pick a block (370 in our case)
 ```
 cleos get block 370
 ```
-- take the block id 0000017239cb40966c033ebf0d9f48b1400ed620342ab134afa57b70bf0d9d77
+2) take the block id 0000017239cb40966c033ebf0d9f48b1400ed620342ab134afa57b70bf0d9d77
+
+3) execute and wait between 5 to 15 minutes (depending on your hw speed)
 ```
 cd validator
 ./validate_chain_at_bloc.sh 0000017239cb40966c033ebf0d9f48b1400ed620342ab134afa57b70bf0d9d77
 ```
+4) enjoy results :)
 
-Take snapshot from a remote node
-- obtain the genesis.json used in the chain
-- pick a block where you want to validate the chain at (ej:4000)
+![Alt Text](https://i.imgur.com/jdlPjkm.png)
+
+B) Take snapshot from a remote node
+1) obtain the genesis.json used in the chain
+2) pick a block where you want to validate the chain at (ej:4000)
 ```
 cleos --url=http://the.remote.node.com:8888 get block 4000
 ```
-- take the block id 0000017239cb40966c033ebf0d9f48b1400ed620342ab134afa57b70bf0d9d77
+3) take the block id 0000017239cb40966c033ebf0d9f48b1400ed620342ab134afa57b70bf0d9d77
 ```
 PEERP2P=the.remote.node.com:9876 GENESIS=/path/to/genesis ./validate_chain_at_bloc.sh 0000017239cb40966c033ebf0d9f48b1400ed620342ab134afa57b70bf0d9d77
 ```
