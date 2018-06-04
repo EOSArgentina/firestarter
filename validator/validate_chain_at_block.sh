@@ -164,27 +164,24 @@ while true; do
             ;;
         --network=* )
             NETWORK="${1#*=}";
-            echo 3
             shift
             ;;
         --block=* )
             BLOCKID="${1#*=}";
-            echo 2
             shift
             ;;
         --p2p=* )
             PEERP2P="${1#*=}";
-            echo 1
             shift
             ;;
         -* )
             printf 'recatate y leete el usage "%s" no es una opcion \n' "${1}";
             exit 0
             ;;
-            * )
-          #      usage;
-                break
-                ;;
+        * )
+          usage;
+            break
+            ;;
             esac
         done
 
