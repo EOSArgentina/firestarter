@@ -55,10 +55,11 @@ EOF
 
 
 check(){
-
 GENESIS=$ME/$NETWORK/genesis.json
 ERC20SNAPSHOT=$ME/$NETWORK/snapshot.csv
-
+echo $NETWORK
+echo $BLOCKID
+echo $PEERP2P
 nodeos --help | grep snapshot > /dev/null 2>&1
 
 if [[ $? -ne 0 ]]; then
@@ -163,25 +164,30 @@ while true; do
             ;;
         --network=* )
             NETWORK="${1#*=}";
+            echo 3
             shift
             ;;
         --block=* )
             BLOCKID="${1#*=}";
+            echo 2
             shift
             ;;
         --p2p=* )
             PEERP2P="${1#*=}";
+            echo 1
             shift
             ;;
         -* )
             printf 'recatate y leete el usage "%s" no es una opcion \n' "${1}";
             exit 0
             ;;
-        * )
-          #  usage;
-          #  exit 0
-            ;;
-        esac
-done
-check
-validatesnapshot
+            * )
+          #      usage;
+                break
+                ;;
+            esac
+        done
+
+echo cat
+#check
+#validatesnapshot
