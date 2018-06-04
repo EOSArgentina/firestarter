@@ -178,12 +178,10 @@ while true; do
             exit 0
             ;;
         * )
-            usage;
-            exit 0
+          #  usage;
+          #  exit 0
             ;;
         esac
 done
-
-echo $NETWORK
-echo $BLOCKID
-echo $PEERP2P
+check
+validatesnapshot
