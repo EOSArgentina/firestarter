@@ -188,6 +188,5 @@ while true; do
             esac
         done
 
-echo cat
-#check
-#validatesnapshot
+check
+validatesnapshot
