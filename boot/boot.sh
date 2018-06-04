@@ -135,8 +135,7 @@ fi
 cd -
 
 #TODO add b1 additional liquid issued as param
-echo '["b1", "10.0000 EOS", "'$MEMO'"]' > $tmp
-runcmd cleos push action eosio.token issue $tmp -p eosio
+cleos push action eosio.token issue '["b1", "10.0000 EOS", "memo"]' -p eosio
 
 #RESIGN ACCOUNTS
 echo  '{"account": "eosio", "permission": "active", "parent": "owner", "auth":{"threshold": 1, "keys": [], "waits": [], "accounts": [{"weight": 1, "permission": {"actor": "eosio.prods", "permission": active}}]}}' > $tmp 
