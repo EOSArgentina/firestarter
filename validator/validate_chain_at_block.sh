@@ -57,9 +57,6 @@ EOF
 check(){
 GENESIS=$ME/$NETWORK/genesis.json
 ERC20SNAPSHOT=$ME/$NETWORK/snapshot.csv
-echo $NETWORK
-echo $BLOCKID
-echo $PEERP2P
 nodeos --help | grep snapshot > /dev/null 2>&1
 
 if [[ $? -ne 0 ]]; then
@@ -153,7 +150,7 @@ python validator.py --validator=vanilla_validator \
 }
 
 
-if [[ $1 -eq "" ]]; then
+if [[ "$*" == "" ]]; then
    usage;
    exit 0
 fi
