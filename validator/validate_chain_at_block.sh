@@ -13,10 +13,11 @@ SYNOPSIS
     validate_chain_at_block.sh [-h|--help]
                     [--network=<chain_to_validate>]
                     [--block=<block_id_after_eosio_resigns>]
+                    [--p2p=<address>:<port>]
 
 DESCRIPTION
 
-    Validate_chain_at_block takes a snapshot of the blockchain
+    Validate_chaiin_at_block takes a snapshot of the blockchain
     at the block you select with --block, and validates:
 
     The genesis.json.
@@ -46,7 +47,7 @@ OPTIONS
 
 EXAMPLES
 
-    SHELL> ./validate_chain_at_block.sh
+    SHELL> ./validate_chain_at_block.sh --network=ghostbios --block=000017dee519f1785e571480fe72989ac2dc7e4d00ecd0aa925aba6e7af414e4 --p2p=127.0.0.1:9876
 
 
 EOF
@@ -54,6 +55,32 @@ EOF
 
 
 check(){
+
+GENESIS=$ME/$NETWORK/genesis.json
+ERC20SNAPSHOT=$ME/$NETWORK/snapshot.csv
+
+nodeos --help | grep snapshot > /dev/null 2>&1
+
+if [[ $? -ne 0 ]]; then
+  echo "nodeos doesnt support snapshot"
+  echo "please merge: https://github.com/EOSIO/eos/pull/3587 first"
+  exit
+fi
+
+if [[ "$BLOCKID" == "" ]]; then
+  echo "Plase specify the block id"
+  exit
+fi
+
+if [[ ! -f "$GENESIS" ]]; then
+  echo "Genesis file does not exists in $NETWORK folder"
+  exit
+fi
+
+if [[ ! -f "$ERC20SNAPSHOT" ]]; then
+  echo "ERC20 snapshot does not exists in $NETWORK folder"
+  exit
+fi
 
 
 }
@@ -124,6 +151,8 @@ python validator.py --validator=vanilla_validator \
 
 }
 
+
+
 ##Argumentos
 while true; do
     case $1 in
@@ -137,19 +166,24 @@ while true; do
             shift
             ;;
         --block=* )
-            BLOCK="${1#*=}";
+            BLOCKID="${1#*=}";
+            shift
+            ;;
+        --P2P=* )
+            PEERP2P="${1#*=}";
             shift
             ;;
         -* )
-            printf 'please read the usage "%s" is not an option \n' "${1}";
+            printf 'recatate y leete el usage "%s" no es una opcion \n' "${1}";
             exit 0
             ;;
         * )
             usage;
-            break
+            exit 0
             ;;
         esac
-    done
+done
 
-check()
-validatesnapshot()
+echo $NETWORK
+echo $BLOCKID
+echo $PEERP2P
