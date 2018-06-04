@@ -8,7 +8,7 @@ fi
 BLOCKID=${BLOCKID:-$1}
 PEERP2P=${PEERP2P:-127.0.0.1:9876}
 
-GENESIS=$ME/$NETWORK/genesis.json
+GENESIS=${GENESIS:-$ME/$NETWORK/genesis.json}
 ERC20SNAPSHOT=$ME/$NETWORK/snapshot.csv
 
 nodeos --help | grep snapshot > /dev/null 2>&1
