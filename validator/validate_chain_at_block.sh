@@ -1,37 +1,65 @@
 #!/bin/bash
 ME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [[ "$NETWORK" == "" ]]; then
-  NETWORK=this
-fi
+usage () {
+cat << EOF
+NAME
 
-BLOCKID=${BLOCKID:-$1}
-PEERP2P=${PEERP2P:-127.0.0.1:9876}
+    EOS validator chain
 
-GENESIS=$ME/$NETWORK/genesis.json
-ERC20SNAPSHOT=$ME/$NETWORK/snapshot.csv
 
-nodeos --help | grep snapshot > /dev/null 2>&1
-if [[ $? -ne 0 ]]; then
-  echo "nodeos doesnt support snapshot"
-  echo "please merge: https://github.com/EOSIO/eos/pull/3587 first"
-  exit
-fi
+SYNOPSIS
 
-if [[ "$BLOCKID" == "" ]]; then
-  echo "Plase specify the block id"
-  exit
-fi
+    validate_chain_at_block.sh [-h|--help]
+                    [--network=<chain_to_validate>]
+                    [--block=<block_id_after_eosio_resigns>]
 
-if [[ ! -f "$GENESIS" ]]; then
-  echo "Genesis file does not exists in $NETWORK folder"
-  exit
-fi
+DESCRIPTION
 
-if [[ ! -f "$ERC20SNAPSHOT" ]]; then
-  echo "ERC20 snapshot does not exists in $NETWORK folder"
-  exit
-fi
+    Validate_chain_at_block takes a snapshot of the blockchain
+    at the block you select with --block, and validates:
+
+    The genesis.json.
+    The global Parameters.
+    Global Parameter - Max RAM Size
+    The System Accounts.
+    The System Contracts.
+    The erc20 Snapshot/account creation.
+    Accounts Stakes.
+    Account Permissions.
+    Validate that there are no codes in the snapshots accounts.
+    Validate Constitution
+    EOS Token Existence & Consistency
+
+
+
+OPTIONS
+
+    -h, --help
+            help help
+    --network
+            Selects the chain you want to validate, please put
+            the genesis and the snapshot inside the folder.
+
+    --block
+            select the block number to take a snapshot
+
+EXAMPLES
+
+    SHELL> ./validate_chain_at_block.sh
+
+
+EOF
+}
+
+
+check(){
+
+
+}
+
+validatesnapshot(){
+
 
 BINSNAPSHOT=$ME/$NETWORK/files/snapshot.bin
 JSONSNAPSHOT=$ME/$NETWORK/files/snapshot.json
@@ -48,7 +76,7 @@ if [[ -f $JSONSNAPSHOT ]]; then
           case $yn in
               Yes ) VALIDSNAPSHOT=1; break;;
           esac
-      done      
+      done
     fi
   fi
 fi
@@ -93,3 +121,35 @@ fi
 python validator.py --validator=vanilla_validator \
    --snapshot $JSONSNAPSHOT --genesis $GENESIS \
    --csv-balance $ERC20SNAPSHOT
+
+}
+
+##Argumentos
+while true; do
+    case $1 in
+        -h | --help )
+            clear > /dev/null;
+            usage | less;
+            exit 0
+            ;;
+        --network=* )
+            NETWORK="${1#*=}";
+            shift
+            ;;
+        --block=* )
+            BLOCK="${1#*=}";
+            shift
+            ;;
+        -* )
+            printf 'please read the usage "%s" is not an option \n' "${1}";
+            exit 0
+            ;;
+        * )
+            usage;
+            break
+            ;;
+        esac
+    done
+
+check()
+validatesnapshot()
