@@ -169,7 +169,7 @@ while true; do
             BLOCKID="${1#*=}";
             shift
             ;;
-        --P2P=* )
+        --p2p=* )
             PEERP2P="${1#*=}";
             shift
             ;;
