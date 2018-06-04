@@ -1,10 +1,8 @@
 nodeos.pid
 eos.log
 .mark
-boot/data
 validator/data
 validator/data
-data
 files
 *.pyc
 .vscode
