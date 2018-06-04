@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import csv
+import tempfile
+from hashlib import sha256
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path[0:0] = [ DIR_PATH + '/../lib' ]
@@ -13,22 +15,90 @@ CSV_EOS_ACCOUNT  = 1
 CSV_EOS_ADDR     = 2
 CSV_EOS_BALANCE  = 3
 
-######################################
-# NAME | PRIVILEGED | RESIGN ACCOUNT #
-######################################
 system_accounts = {
-    'eosio'       : {'privileged':True ,'actor':'eosio.prods','permission':'active'}, 
-    'eosio.bpay'  : {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.msig'  : {'privileged':True ,'actor':'eosio','permission':'active'},
-    'eosio.names' : {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.ram'   : {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.ramfee': {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.saving': {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.stake' : {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.token' : {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.vpay'  : {'privileged':False,'actor':'eosio','permission':'active'},
-    'eosio.null'  : {'privileged':False},
-    'eosio.prods' : {'privileged':False,'actor':'eosio','permission':'active'}
+  'eosio' : {
+    'privileged' : True,
+    'actor'      : 'eosio.prods',
+    'permission' : 'active',
+    'code'       : "",
+    'code'       : 'daf48f1b958af29180b2c33c8b239fa976ddb91cabe662e7b5e82c57c4c6b19f' ,
+    'abi'        : 'eosio.system.abi'
+   }, 
+  'eosio.bpay' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+   },
+  'eosio.msig' : {
+    'privileged' : True,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : '5cf017909547b2d69cee5f01c53fe90f3ab193c57108f81a17f0716a4c83f9c0',
+    'abi'        : 'eosio.msig.abi',
+   },
+  'eosio.names' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+   },
+  'eosio.ram' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+   },
+  'eosio.ramfee' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+   },
+  'eosio.saving' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+   },
+  'eosio.stake' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+   },
+  'eosio.token' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : '3e0cf4172ab025f9fff5f1db11ee8a34d44779492e1d668ae1dc2d129e865348',
+    'abi'        : 'eosio.token.abi',
+   },
+  'eosio.vpay' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+   },
+  'eosio.null' : {
+    'privileged' : False,
+    'code'       : "",
+    'abi'        : ""
+    },
+  'eosio.prods' : {
+    'privileged' : False,
+    'actor'      : 'eosio',
+    'permission' : 'active',
+    'code'       : "",
+    'abi'        : ""
+  }
 }
 
 def description():
@@ -36,14 +106,6 @@ def description():
 
 class ValidationException(Exception):
   pass
-
-# def get_balance(snapshot, account, symbol='EOS'):
-#   if account not in snapshot['tables']['eosio.token']:
-#     raise ValidationException("Balance not found")
-#   if symbol not in snapshot['tables']['eosio.token'][account]['accounts']:
-#     raise ValidationException("Balance not found")
-
-#   return snapshot['tables']['eosio.token'][account]['accounts'][symbol]['data']['balance']
 
 def authority_controlled_by_one_actor(perm, actor, permission):
     if perm['auth']['threshold'] != 1: return False
@@ -131,19 +193,25 @@ def validate_genesis(snapshot, genesis):
 
   if len(added) != 0 or len(removed) != 0 or len(changed) != 0:
     fail()
-    if len(added) != 0:
-      print "> Snapshot has '%s' and your genesis dont" % (','.join(added))
-    if len(removed) != 0:
-      print "> Your genesis has %s and snapshot dont" % (','.join(removed))
-    if len(changed) != 0:
-      print "> Your genesis and snapshot have different '%s'" % (','.join(changed))
+    tmp = tempfile.mkstemp()[1]
+    with open(tmp,'w') as out:
+      if len(added) != 0:
+        out.write("> Snapshot has '%s' and your genesis dont\n" % (','.join(added)))
+      if len(removed) != 0:
+        out.write("> Your genesis has %s and snapshot dont\n" % (','.join(removed)))
+      if len(changed) != 0:
+        out.write("> Your genesis and snapshot have different '%s'\n" % (','.join(changed)))
+    
+      out.write('\n')
+      out.write("# Snapshot genesis\n")
+      out.write(json.dumps(snapshot['genesis_state'], indent=2, sort_keys=True))
+      out.write('\n')
+      out.write("# Your genesis\n")
+      out.write(json.dumps(genesis, indent=2, sort_keys=True))
+      out.write('\n')
 
-    print "# Snapshot genesis"
-    print json.dumps(snapshot['genesis_state'], indent=2, sort_keys=True)
-    print
-    print "# Your genesis"
-    print json.dumps(genesis, indent=2, sort_keys=True)
-    return False
+    print "> please check %s for details" % tmp
+    return True
   
   success()
   return True
@@ -207,12 +275,9 @@ def validate_account_stake(snapshot, balances, args):
 
     liquid, net, cpu = get_account_stake(snapshot, account, args.core_symbol)
 
-    if account == "b1":
-      liquid -= 10 * 10000
-
     # TODO: validate F(stake) ?
     if total != liquid + cpu + net:
-      print_count = print_some(print_count, '{3} => L:[{0}] C:[{1}] N:[{2}]'.format(liquid,cpu,net,account))
+      print_count = print_some(print_count, '{0} => TOTAL: [{1}] L:[{2}] C:[{3}] N:[{4}]'.format(account,total,liquid,cpu,net))
       invalid_stake += 1
 
   if invalid_stake > 0:
@@ -227,10 +292,28 @@ def validate_system_accounts(snapshot):
   step('Verifying system accounts')
 
   found = []
-  for name, account in snapshot['accounts'].iteritems():
-    tick()
-    if name in system_accounts:
+  for name in system_accounts:
+      tick()
 
+      # Verify exists
+      if name not in snapshot['accounts']:
+        fail()
+        print "> %s account does not exists" % (name)
+        return False
+
+      account = snapshot['accounts'][name]
+
+      # Verify code
+      current  = sha256(account['code'].decode('hex')).digest().encode('hex')
+      expected = system_accounts[name]['code']
+      if current != expected:
+        fail()
+        print "> wrong code on %s account\n\texpected : %s\n\tcurrent  : %s" % (name,expected,current)
+        return False
+
+      # Verify ABI
+
+      # Verify privileged
       if account['privileged'] != system_accounts[name]['privileged']:
         fail()
         print "> %s account wrong privileged setting" % (name)
@@ -271,8 +354,11 @@ def validate_no_code_in_accounts(snapshot, balances):
   if with_code > 0:
     warning()
     print "> %d accounts with code set" % (with_code)
+    return False
   else:
     success()
+
+  return True
 
 def validate_account_permissions(snapshot, balances):
 
@@ -288,8 +374,27 @@ def validate_account_permissions(snapshot, balances):
   if invalid_perm > 0:
     warning()
     print "> %d accounts with invalid permission" % (with_code)
+    return False
   else:
     success()
+  return True
+
+def validate_no_privileged_accounts(snapshot):
+  step('Verifying privileged accounts')
+
+  privileged_accounts = []
+  for sa in system_accounts:
+    if system_accounts[sa]['privileged']:
+      privileged_accounts.append(sa)
+
+  for name in snapshot['accounts']:
+    if snapshot['accounts'][name]['privileged'] and name not in privileged_accounts:
+      fail()
+      print "> Invalid privileged account found : %s" % name
+      return False
+  else:
+    success()
+  return True
 
 def validate_global_params_against_genesis(snapshot, genesis):
   
@@ -298,6 +403,11 @@ def validate_global_params_against_genesis(snapshot, genesis):
   table = snapshot['tables']['eosio']['eosio']['global']
   params = table[table.keys()[0]]['data']
   
+  if not 'initial_configuration' in genesis:
+    fail()
+    print "> Unable to compare global params, initial_configuration not found in genesis"
+    return True
+
   diff = []
   for gp in genesis['initial_configuration']:
     if genesis['initial_configuration'][gp] != params[gp]:
@@ -305,9 +415,25 @@ def validate_global_params_against_genesis(snapshot, genesis):
 
   if len(diff):
     warning()
-    print "Global params different from genesis : %s" % diff
+    print "> Global params different from genesis : %s" % diff
   else:
     success()
+  return True
+
+def validate_extra_accounts(snapshot, balances):
+
+  step('Verifying extra accounts')
+
+  print_count = 0
+  for account in snapshot['accounts']:
+    if print_count == 0 : tick()
+    if account not in balances and account not in system_accounts:
+      print_count = print_some(print_count, "> Extra account found %s" % account )
+
+  if print_count != 0:
+    return False
+  
+  success()
   return True
 
 # Vanilla validation
@@ -317,13 +443,13 @@ def validate(args):
   erc20_snapshot = load_erc20_snapshot(args)
   genesis        = load_genesis(args)
 
-  #if not validate_genesis(eos_snapshot, genesis): return
+  if not validate_genesis(eos_snapshot, genesis): return
 
-  #if not validate_global_params_against_genesis(eos_snapshot, genesis): return
+  if not validate_global_params_against_genesis(eos_snapshot, genesis): return
 
   #if not validate_system_accounts(eos_snapshot): return
 
-  #if not validate_system_contracts(eos_snapshot): return
+  #if not validate_constitution(eos_snapshot): return
 
   erc20_snapshot = validate_account_creation(eos_snapshot, erc20_snapshot)
   if not erc20_snapshot: return
@@ -334,7 +460,9 @@ def validate(args):
 
   if not validate_account_permissions(eos_snapshot, erc20_snapshot): return
 
-  #if not validate_extra_accounts(eos_snapshot, erc20_snapshot): return
+  if not validate_no_privileged_accounts(eos_snapshot): return
+
+  if not validate_extra_accounts(eos_snapshot, erc20_snapshot): return
 
   # token only one EOS / supply / maxsupply
   # balance of system accounts

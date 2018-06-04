@@ -1,6 +1,9 @@
 #!/bin/bash
 ME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+NETWORK=this
+PEERP2P=127.0.0.1:9876
+
 usage () {
 cat << EOF
 NAME
@@ -130,7 +133,7 @@ if [[ $VALIDSNAPSHOT -eq 0 ]]; then
   tailpid=$!
   echo "Waiting for snapshot to be taken ........ (please wait)"
   tail -f $NETWORK/data/eos.log &
-  grep -m 1 "$BLOCKID" "${fifo}" 2> /dev/null
+  grep -m 1 "Snapshot saved" "${fifo}" 2> /dev/null
   kill "${tailpid}" 2> /dev/null
   wait "${tailpid}" 2>/dev/null
   kill "${nodeospid}" 2> /dev/null
