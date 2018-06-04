@@ -155,8 +155,8 @@ python validator.py --validator=vanilla_validator \
 
 
 ##Argumentos
-while true; do
-    case $1 in
+
+case $1 in
         -h | --help )
             clear > /dev/null;
             usage | less;
@@ -179,11 +179,10 @@ while true; do
             exit 0
             ;;
         * )
-          usage;
+           usage;
             break
             ;;
-            esac
-        done
+esac
 
 check
 validatesnapshot
