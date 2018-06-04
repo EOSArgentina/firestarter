@@ -153,10 +153,14 @@ python validator.py --validator=vanilla_validator \
 }
 
 
+if [[ $1 -eq "" ]]; then
+   usage;
+   exit 0
+fi
 
 ##Argumentos
-
-case $1 in
+while true; do
+    case $1 in
         -h | --help )
             clear > /dev/null;
             usage | less;
@@ -179,10 +183,10 @@ case $1 in
             exit 0
             ;;
         * )
-           usage;
             break
             ;;
-esac
+            esac
+        done
 
 check
 validatesnapshot
