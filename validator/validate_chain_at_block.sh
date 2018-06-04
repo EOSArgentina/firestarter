@@ -129,6 +129,7 @@ if [[ $VALIDSNAPSHOT -eq 0 ]]; then
   tail -f $LOG >${fifo} &
   tailpid=$!
   echo "Waiting for snapshot to be taken ........ (please wait)"
+  tail -f $NETWORK/data/eos.log &
   grep -m 1 "$BLOCKID" "${fifo}" 2> /dev/null
   kill "${tailpid}" 2> /dev/null
   wait "${tailpid}" 2>/dev/null
