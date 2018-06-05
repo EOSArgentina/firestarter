@@ -8,7 +8,7 @@ from hashlib import sha256
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path[0:0] = [ DIR_PATH + '/../lib' ]
 
-from utils import step, tick, success, warning, asset2int, name_to_string, DictDiffer, symbol2int, string_to_name
+from utils import step, tick, success, warning, asset2int, int2asset, name_to_string, DictDiffer, symbol2int, string_to_name
 
 CSV_ETH_ADDR     = 0
 CSV_EOS_ACCOUNT  = 1
@@ -21,7 +21,7 @@ system_accounts = {
     'actor'      : 'eosio.prods',
     'permission' : 'active',
     'code'       : "",
-    'code'       : 'daf48f1b958af29180b2c33c8b239fa976ddb91cabe662e7b5e82c57c4c6b19f' ,
+    'code'       : '2a794d8bbe6a1111350b5afe97ab35e1171b8717184f626470a1c68abcdf4a83' ,
     'abi'        : 'eosio.system.abi'
    }, 
   'eosio.bpay' : {
@@ -316,9 +316,6 @@ def validate_system_accounts(snapshot):
       real     = sha256(account['code'].decode('hex')).digest().encode('hex') if expected else None
 
       if not (expected == current == real):
-        print
-        print "[%s][%s][%s]" % (expected,current,real)
-        print
         errs.append("> wrong code on %s account\n\texpected : %s\n\tcurrent  : %s\n\tcalculated : %s" % (name,expected if expected else "<none>", current if current else "<none>", real if real else "<none>"))
 
       # Verify ABI / Constitution
@@ -328,26 +325,9 @@ def validate_system_accounts(snapshot):
           expected_abi = json.load(f)
           current_abi  = account['abi']
 
+          # HACK: special character \u2019
           if name == "eosio":
-            print
-            print "####################################"
-            print
-            print type(expected_abi)
-            print type(current_abi)
-            print
-            # print expected_abi["ricardian_clauses"][0]["body"]
-            # with open("/tmp/c1",'w') as f:
-            #   f.write(expected_abi["ricardian_clauses"][0]["body"])
-
-            print
-            print current_abi["ricardian_clauses"][0]["body"]
-            with open("/tmp/c2",'w') as f:
-              f.write(current_abi["ricardian_clauses"][0]["body"])
-
-            print
-            print current_abi["ricardian_clauses"][0]["body"] == expected_abi["ricardian_clauses"][0]["body"]
-            print
-            print "####################################"
+            current_abi["ricardian_clauses"][0]["body"] = current_abi["ricardian_clauses"][0]["body"].replace("u2019","\\u2019")
 
           ddiff = DictDiffer(expected_abi, current_abi)
           added   = ddiff.added()
@@ -555,7 +535,7 @@ def validate_extra_accounts(snapshot, balances, args):
 
   return True
 
-def validate_EOS_token(snapshot, args):
+def validate_EOS_token(snapshot, balances, args):
 
   step('Verifying EOS token')
 
@@ -569,6 +549,17 @@ def validate_EOS_token(snapshot, args):
   if asset2int(eos_token['max_supply']) != 100000000000000:
     if ok: warning(); ok = False
     print "> EOS max supply != 10000M (%s)" % eos_token['max_supply']
+
+  # Calc supply:
+  def EOS_for_N_buys_of_8k_ram(N):
+   return int(round(10000.0*float((10**6)*N/((2**23)-N))))
+
+  # 163928 number of registered accounts in final snapshot
+  expected_supply = 10000000000000 + EOS_for_N_buys_of_8k_ram(163928)
+
+  if abs( asset2int(eos_token['supply']) - expected_supply ) > 20000:
+    if ok: warning(); ok = False
+    print "> EOS supply %s != %s" % (eos_token['max_supply'], int2asset(expected_supply, "EOS"))
 
   tokens = 0
   code = snapshot['tables']['eosio.token']
@@ -596,7 +587,7 @@ def validate(args):
   if not validate_genesis(eos_snapshot, genesis): return
 
   # Token
-  if not validate_EOS_token(eos_snapshot, args): return
+  if not validate_EOS_token(eos_snapshot, erc20_snapshot, args): return
 
   # System
   if not validate_global_params_against_genesis(eos_snapshot, genesis): return
