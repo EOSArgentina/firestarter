@@ -9,9 +9,9 @@ CONTRACT_FOLDER=$EOSROOT/contracts
 SYSTEM_ACCOUNTS="eosio.bpay eosio.msig eosio.names eosio.ram eosio.ramfee eosio.saving eosio.stake eosio.token eosio.vpay"
 
 # Amout of eos to create
-EOS_CREATE="50000000000.0000 "$CORE_SYMBOL
+EOS_CREATE="10000000000.0000 "$CORE_SYMBOL
 # Amount of eos to issue
-EOS_ISSUE="2000000000.0000 "$CORE_SYMBOL
+EOS_ISSUE="1000000000.0000 "$CORE_SYMBOL
 MEMO="hola mundo :)"
 
 ACCOUNTS_PER_TX=1500

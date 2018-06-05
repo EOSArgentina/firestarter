@@ -28,7 +28,7 @@ def string_to_name(s):
     name |= char_to_symbol(s[12]) & 0x0F;
   return name;
 
-def name_to_string(n):
+def name_to_string(n, strip_dots=True):
   charmap = ".12345abcdefghijklmnopqrstuvwxyz"
   s = bytearray(13*'.')
   tmp = n;
@@ -36,8 +36,11 @@ def name_to_string(n):
     c = charmap[tmp & (0x0f if i == 0 else 0x1f)]
     s[12-i] = c
     tmp >>= (4 if i == 0 else 5)
-  return str(s).strip('.')
 
+  s = str(s)
+  if strip_dots: 
+    s = s.strip('.')
+  return s 
 
 class DictDiffer(object):
   """

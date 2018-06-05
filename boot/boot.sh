@@ -35,8 +35,9 @@ runcmd() {
 }
 
 echo "How many accounts you want to inject from ERC20 snapshot?"
-select yn in "1000" "5000" "30000" "All"; do
+select yn in "1" "1000" "5000" "30000" "All"; do
     case $yn in
+        "1" ) ACCOUNTS_TO_INJECT=1; break;;
         "1000" ) ACCOUNTS_TO_INJECT=1000; break;;
         "5000" ) ACCOUNTS_TO_INJECT=5000; break;;
         "3000" ) ACCOUNTS_TO_INJECT=30000; break;;
