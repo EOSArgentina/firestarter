@@ -23,5 +23,5 @@ for filename in $(ls -1 $ME/producers/*.key 2> /dev/null); do
 done
 
 
-nodeos --max-irreversible-block-age 999999999 --wasm-runtime wavm --data-dir $ME/data --config-dir $ME/data --genesis-json $ME/data/genesis.json --max-transaction-time 100000 > $ME/logs/eos.log 2>&1 &
+nodeos --max-irreversible-block-age 999999999 --abi-serializer-max-time-ms 99999999 --wasm-runtime wavm --data-dir $ME/data --config-dir $ME/data --genesis-json $ME/data/genesis.json --max-transaction-time 100000 > $ME/logs/eos.log 2>&1 &
 echo $! > $ME/nodeos.pid
